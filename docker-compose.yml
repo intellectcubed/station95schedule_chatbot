@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  groupme-poller:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: station95-groupme-poller
+    restart: unless-stopped
+
+    # Environment variables - FILL THESE IN or use .env file
+    environment:
+      # GroupMe Configuration (REQUIRED)
+      - GROUPME_API_TOKEN=${GROUPME_API_TOKEN}
+      - GROUPME_GROUP_ID=${GROUPME_GROUP_ID}
+      - GROUPME_BOT_ID=${GROUPME_BOT_ID}
+
+      # AI Provider Configuration (REQUIRED)
+      - AI_PROVIDER=${AI_PROVIDER:-openai}
+      - AI_MODE=${AI_MODE:-simple}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+
+      # Calendar Service (REQUIRED)
+      - CALENDAR_SERVICE_URL=${CALENDAR_SERVICE_URL}
+
+      # Bot Configuration (OPTIONAL)
+      - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-70}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ROSTER_FILE_PATH=${ROSTER_FILE_PATH:-data/roster.json}
+
+    # Persistent volumes for state and logs
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      # Optional: mount roster.json from host
+      # - ./data/roster.json:/app/data/roster.json:ro
+
+    # Health check (optional)
+    # Checks if cron is still running
+    healthcheck:
+      test: ["CMD", "pgrep", "cron"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Resource limits (optional but recommended)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M

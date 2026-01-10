@@ -1,0 +1,17 @@
+You are analyzing a shift coverage message.
+
+**Current Context:**
+- Date: {date}
+- Time: {time}
+- Sender: {sender}
+
+**Message:**
+{message}
+
+**Task:**
+Determine if this is a shift coverage request and respond with JSON:
+{{
+    "is_shift_request": true/false,
+    "confidence": 0-100,
+    "reasoning": "brief explanation"
+}}

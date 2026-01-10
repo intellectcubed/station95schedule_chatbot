@@ -1,0 +1,20 @@
+# Core dependencies
+langchain==0.3.13
+langchain-openai==0.2.14
+langgraph==0.2.60
+
+# Database
+supabase==2.10.0
+
+# Data validation
+pydantic==2.10.4
+pydantic-settings==2.7.0
+
+# HTTP client
+requests==2.32.3
+
+# Environment variables
+python-dotenv==1.0.1
+
+# Date/time utilities
+python-dateutil==2.9.0

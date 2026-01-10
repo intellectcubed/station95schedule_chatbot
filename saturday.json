@@ -1,0 +1,125 @@
+{
+  "success": true,
+  "action": "get_schedule_day",
+  "date": "20260103",
+  "schedule": {
+    "day": "Saturday 2026-01-03",
+    "shifts": [
+      {
+        "name": "Day Shift",
+        "start_time": "06:00",
+        "end_time": "18:00",
+        "segments": [
+          {
+            "start_time": "06:00",
+            "end_time": "18:00",
+            "squads": [
+              {
+                "id": 35,
+                "territories": [
+                  34,
+                  35,
+                  43
+                ],
+                "active": true
+              },
+              {
+                "id": 42,
+                "territories": [
+                  42,
+                  54
+                ],
+                "active": true
+              }
+            ]
+          }
+        ],
+        "tango": 35
+      },
+      {
+        "name": "18:00 - 22:00 Shift",
+        "start_time": "18:00",
+        "end_time": "22:00",
+        "segments": [
+          {
+            "start_time": "18:00",
+            "end_time": "22:00",
+            "squads": [
+              {
+                "id": 35,
+                "territories": [
+                  34,
+                  35,
+                  42,
+                  43,
+                  54
+                ],
+                "active": true
+              },
+              {
+                "id": 42,
+                "territories": [],
+                "active": false
+              }
+            ]
+          }
+        ],
+        "tango": 35
+      },
+      {
+        "name": "22:00 - 01:00 Shift",
+        "start_time": "22:00",
+        "end_time": "01:00",
+        "segments": [
+          {
+            "start_time": "22:00",
+            "end_time": "01:00",
+            "squads": [
+              {
+                "id": 35,
+                "territories": [],
+                "active": false
+              },
+              {
+                "id": 42,
+                "territories": [],
+                "active": false
+              }
+            ]
+          }
+        ],
+        "tango": null
+      },
+      {
+        "name": "01:00 - 06:00 Shift",
+        "start_time": "01:00",
+        "end_time": "06:00",
+        "segments": [
+          {
+            "start_time": "01:00",
+            "end_time": "06:00",
+            "squads": [
+              {
+                "id": 35,
+                "territories": [
+                  34,
+                  35,
+                  42,
+                  43,
+                  54
+                ],
+                "active": true
+              },
+              {
+                "id": 42,
+                "territories": [],
+                "active": false
+              }
+            ]
+          }
+        ],
+        "tango": 35
+      }
+    ]
+  }
+}

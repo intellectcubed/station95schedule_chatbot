@@ -1,0 +1,130 @@
+{
+  "members": [
+    {
+      "name": "Mike Halperin",
+      "title": "Chief",
+      "squad": 34,
+      "groupme_name": "Mike Halperin"
+    },
+    {
+      "name": "Katie Sowden",
+      "title": "Chief",
+      "squad": 35,
+      "groupme_name": "Katie Sowden"
+    },
+    {
+      "name": "Kohler",
+      "title": "Chief",
+      "squad": 42,
+      "groupme_name": "Kohler"
+    },
+    {
+      "name": "George Nowakowski",
+      "title": "Chief",
+      "squad": 43,
+      "groupme_name": "George Nowakowski"
+    },
+    {
+      "name": "George Nowakowski",
+      "title": "Chief",
+      "squad": 43,
+      "groupme_name": "Geo Now"
+    },
+    {
+      "name": "Mike B",
+      "title": "Chief",
+      "squad": 54,
+      "groupme_name": "Mike B"
+    },
+    {
+      "name": "Charles Sharkey",
+      "title": "Member",
+      "squad": 34,
+      "groupme_name": "Charles Sharkey"
+    },
+    {
+      "name": "Joe",
+      "title": "Member",
+      "squad": 34,
+      "groupme_name": "Joe"
+    },
+    {
+      "name": "Steph L",
+      "title": "Member",
+      "squad": 34,
+      "groupme_name": "Steph L"
+    },
+    {
+      "name": "Stanley Stellakis",
+      "title": "Member",
+      "squad": 34,
+      "groupme_name": "Stanley Stellakis"
+    },
+    {
+      "name": "Marc Sowden",
+      "title": "Member",
+      "squad": 35,
+      "groupme_name": "Marc Sowden"
+    },
+    {
+      "name": "Javier M",
+      "title": "Member",
+      "squad": 42,
+      "groupme_name": "Javier M"
+    },
+    {
+      "name": "Jim R",
+      "title": "Member",
+      "squad": 43,
+      "groupme_name": "Jim R"
+    },
+    {
+      "name": "Lou DiGiovanni",
+      "title": "Member",
+      "squad": 43,
+      "groupme_name": "Lou DiGiovanni"
+    },
+    {
+      "name": "Alice Hadley",
+      "title": "Member",
+      "squad": 43,
+      "groupme_name": "Alice Hadley"
+    },
+    {
+      "name": "Sara Rall",
+      "title": "Member",
+      "squad": 43,
+      "groupme_name": "Sara Rall"
+    },
+    {
+      "name": "Diane Chrinko",
+      "title": "Member",
+      "squad": 54,
+      "groupme_name": "Diane Chrinko"
+    },
+    {
+      "name": "Donna Rogers",
+      "title": "Member",
+      "squad": 54,
+      "groupme_name": "Donna Rogers"
+    },
+    {
+      "name": "Freedie P",
+      "title": "Member",
+      "squad": 54,
+      "groupme_name": "Freedie P"
+    },
+    {
+      "name": "Steve Weinman",
+      "title": "Member",
+      "squad": 54,
+      "groupme_name": "Steve Weinman"
+    },
+    {
+      "name": "Jim Barry",
+      "title": "Member",
+      "squad": 54,
+      "groupme_name": "Jim Barry"
+    }
+  ]
+}

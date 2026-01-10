@@ -1,0 +1,8 @@
+# GroupMe Poller Cron Schedule
+# Runs every 10 minutes
+# Format: minute hour day month weekday command
+
+# Poll GroupMe every 10 minutes
+*/10 * * * * cd /app && /usr/local/bin/python -m src.station95chatbot.poll_messages >> /app/logs/cron.log 2>&1
+
+# Blank line required at end of crontab file
