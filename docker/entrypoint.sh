@@ -12,21 +12,14 @@ echo ""
 
 # Validate required environment variables
 REQUIRED_VARS=(
+    "SUPABASE_URL"
+    "SUPABASE_KEY"
     "GROUPME_API_TOKEN"
     "GROUPME_GROUP_ID"
     "GROUPME_BOT_ID"
+    "OPENAI_API_KEY"
+    "CALENDAR_SERVICE_URL"
 )
-
-# Check AI provider requirements
-if [ "$AI_PROVIDER" = "openai" ] && [ -z "$OPENAI_API_KEY" ]; then
-    echo "ERROR: OPENAI_API_KEY is required when AI_PROVIDER=openai"
-    exit 1
-fi
-
-if [ "$AI_PROVIDER" = "anthropic" ] && [ -z "$ANTHROPIC_API_KEY" ]; then
-    echo "ERROR: ANTHROPIC_API_KEY is required when AI_PROVIDER=anthropic"
-    exit 1
-fi
 
 echo "Environment Check:"
 for var in "${REQUIRED_VARS[@]}"; do
@@ -43,10 +36,11 @@ done
 
 echo ""
 echo "Configuration:"
-echo "  AI Provider: ${AI_PROVIDER:-openai}"
-echo "  AI Mode: ${AI_MODE:-simple}"
 echo "  Log Level: ${LOG_LEVEL:-INFO}"
 echo "  Roster File: ${ROSTER_FILE_PATH:-data/roster.json}"
+echo "  Workflow Expiration: ${WORKFLOW_EXPIRATION_HOURS:-24} hours"
+echo "  User Impersonation: ${ENABLE_USER_IMPERSONATION:-true}"
+echo "  GroupMe Posting: ${ENABLE_GROUPME_POSTING:-true}"
 echo ""
 
 # Create necessary directories
@@ -56,7 +50,7 @@ mkdir -p /app/data /app/logs
 echo "=========================================="
 echo "Running initial poll test..."
 echo "=========================================="
-cd /app && python -m src.station95chatbot.poll_messages
+cd /app && python -m src.poll_messages
 
 if [ $? -eq 0 ]; then
     echo ""

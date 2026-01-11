@@ -10,16 +10,17 @@ services:
 
     # Environment variables - FILL THESE IN or use .env file
     environment:
+      # Supabase Configuration (REQUIRED)
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+
       # GroupMe Configuration (REQUIRED)
       - GROUPME_API_TOKEN=${GROUPME_API_TOKEN}
       - GROUPME_GROUP_ID=${GROUPME_GROUP_ID}
       - GROUPME_BOT_ID=${GROUPME_BOT_ID}
 
-      # AI Provider Configuration (REQUIRED)
-      - AI_PROVIDER=${AI_PROVIDER:-openai}
-      - AI_MODE=${AI_MODE:-simple}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      # OpenAI Configuration (REQUIRED)
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
 
       # Calendar Service (REQUIRED)
       - CALENDAR_SERVICE_URL=${CALENDAR_SERVICE_URL}
@@ -28,6 +29,11 @@ services:
       - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-70}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - ROSTER_FILE_PATH=${ROSTER_FILE_PATH:-data/roster.json}
+      - WORKFLOW_EXPIRATION_HOURS=${WORKFLOW_EXPIRATION_HOURS:-24}
+
+      # Testing Configuration (OPTIONAL)
+      - ENABLE_USER_IMPERSONATION=${ENABLE_USER_IMPERSONATION:-true}
+      - ENABLE_GROUPME_POSTING=${ENABLE_GROUPME_POSTING:-true}
 
     # Persistent volumes for state and logs
     volumes:
