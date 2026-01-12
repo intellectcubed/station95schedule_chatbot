@@ -45,6 +45,11 @@ def setup_logging() -> None:
     groupme_handler.setLevel(logging.INFO)
     groupme_handler.setFormatter(detailed_formatter)
 
+    # File handler for Calendar service communications
+    calendar_handler = logging.FileHandler(log_dir / "calendar.log")
+    calendar_handler.setLevel(logging.INFO)
+    calendar_handler.setFormatter(detailed_formatter)
+
     # Console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(log_level)
@@ -73,6 +78,12 @@ def setup_logging() -> None:
     groupme_logger.setLevel(logging.INFO)
     groupme_logger.addHandler(groupme_handler)
     groupme_logger.propagate = False  # Don't propagate to root logger
+
+    # Configure Calendar logger with its own handler
+    calendar_logger = logging.getLogger("calendar")
+    calendar_logger.setLevel(logging.INFO)
+    calendar_logger.addHandler(calendar_handler)
+    calendar_logger.propagate = False  # Don't propagate to root logger
 
     # Reduce noise from third-party libraries
     logging.getLogger("httpx").setLevel(logging.WARNING)

@@ -1,5 +1,6 @@
 """Client for interacting with the calendar service."""
 
+import json
 import logging
 import requests
 from typing import Any
@@ -8,6 +9,7 @@ from .config import settings
 from .models import CalendarCommand
 
 logger = logging.getLogger(__name__)
+calendar_logger = logging.getLogger("calendar")
 
 
 class CalendarClient:
@@ -41,15 +43,18 @@ class CalendarClient:
         # Build full URL for logging
         full_url = f"{self.base_url}?{'&'.join(f'{k}={v}' for k, v in params.items())}"
 
-        logger.info("=" * 60)
-        logger.info("CALENDAR SERVICE REQUEST")
-        logger.info(f"Action: {command.action}")
-        logger.info(f"Squad: {command.squad}")
-        logger.info(f"Date: {command.date}")
-        logger.info(f"Shift: {command.shift_start}-{command.shift_end}")
-        logger.info(f"Preview Mode: {command.preview}")
-        logger.info(f"Full URL: {full_url}")
-        logger.info("-" * 60)
+        # Log to dedicated calendar log
+        calendar_logger.info("=" * 80)
+        calendar_logger.info("CALENDAR SERVICE REQUEST")
+        calendar_logger.info(f"Method: GET")
+        calendar_logger.info(f"URL: {self.base_url}")
+        calendar_logger.info(f"Parameters:")
+        for key, value in params.items():
+            calendar_logger.info(f"  {key}: {value}")
+        calendar_logger.info(f"Full URL: {full_url}")
+        calendar_logger.info("-" * 80)
+
+        logger.info(f"Sending calendar command: {command.action} for squad {command.squad}")
 
         try:
             response = requests.get(
@@ -64,25 +69,43 @@ class CalendarClient:
             try:
                 response_data = response.json()
 
-                logger.info("CALENDAR SERVICE RESPONSE")
-                logger.info(f"Status Code: {response.status_code}")
-                logger.info(f"Response Body:")
-                logger.info(f"{response_data}")
-                logger.info("=" * 60)
+                # Log to dedicated calendar log
+                calendar_logger.info("CALENDAR SERVICE RESPONSE")
+                calendar_logger.info(f"Status Code: {response.status_code}")
+                calendar_logger.info(f"Response Headers:")
+                for key, value in response.headers.items():
+                    calendar_logger.info(f"  {key}: {value}")
+                calendar_logger.info(f"Response Body (JSON):")
+                calendar_logger.info(json.dumps(response_data, indent=2))
+                calendar_logger.info("=" * 80)
 
+                logger.info(f"Calendar command successful: {response.status_code}")
                 return response_data
             except ValueError:
-                logger.info("CALENDAR SERVICE RESPONSE")
-                logger.info(f"Status Code: {response.status_code}")
-                logger.info(f"Response Body (text): {response.text}")
-                logger.info("=" * 60)
+                # Log text response
+                calendar_logger.info("CALENDAR SERVICE RESPONSE")
+                calendar_logger.info(f"Status Code: {response.status_code}")
+                calendar_logger.info(f"Response Headers:")
+                for key, value in response.headers.items():
+                    calendar_logger.info(f"  {key}: {value}")
+                calendar_logger.info(f"Response Body (text):")
+                calendar_logger.info(response.text)
+                calendar_logger.info("=" * 80)
 
+                logger.info(f"Calendar command successful: {response.status_code}")
                 return {"status": "success", "message": response.text}
 
         except requests.RequestException as e:
-            logger.error("CALENDAR SERVICE ERROR")
-            logger.error(f"Error: {e}")
-            logger.error("=" * 60)
+            # Log error to dedicated calendar log
+            calendar_logger.error("CALENDAR SERVICE ERROR")
+            calendar_logger.error(f"Error Type: {type(e).__name__}")
+            calendar_logger.error(f"Error Message: {str(e)}")
+            if hasattr(e, 'response') and e.response is not None:
+                calendar_logger.error(f"Response Status Code: {e.response.status_code}")
+                calendar_logger.error(f"Response Body: {e.response.text}")
+            calendar_logger.error("=" * 80)
+
+            logger.error(f"Calendar service error: {e}")
             raise
 
     def send_command_with_retry(
@@ -145,14 +168,18 @@ class CalendarClient:
         # Build full URL for logging
         full_url = f"{self.base_url}?{'&'.join(f'{k}={v}' for k, v in params.items())}"
 
-        logger.info("=" * 60)
-        logger.info("CALENDAR SERVICE REQUEST")
-        logger.info(f"Action: get_schedule_day")
-        logger.info(f"Date: {start_date}")
-        if squad:
-            logger.info(f"Squad Filter: {squad}")
-        logger.info(f"Full URL: {full_url}")
-        logger.info("-" * 60)
+        # Log to dedicated calendar log
+        calendar_logger.info("=" * 80)
+        calendar_logger.info("CALENDAR SERVICE REQUEST (GET SCHEDULE)")
+        calendar_logger.info(f"Method: GET")
+        calendar_logger.info(f"URL: {self.base_url}")
+        calendar_logger.info(f"Parameters:")
+        for key, value in params.items():
+            calendar_logger.info(f"  {key}: {value}")
+        calendar_logger.info(f"Full URL: {full_url}")
+        calendar_logger.info("-" * 80)
+
+        logger.info(f"Fetching schedule for date: {start_date}")
 
         try:
             response = requests.get(
@@ -167,23 +194,41 @@ class CalendarClient:
             try:
                 response_data = response.json()
 
-                logger.info("CALENDAR SERVICE RESPONSE")
-                logger.info(f"Status Code: {response.status_code}")
-                logger.info(f"Response Body:")
-                logger.info(f"{response_data}")
-                logger.info("=" * 60)
+                # Log to dedicated calendar log
+                calendar_logger.info("CALENDAR SERVICE RESPONSE (GET SCHEDULE)")
+                calendar_logger.info(f"Status Code: {response.status_code}")
+                calendar_logger.info(f"Response Headers:")
+                for key, value in response.headers.items():
+                    calendar_logger.info(f"  {key}: {value}")
+                calendar_logger.info(f"Response Body (JSON):")
+                calendar_logger.info(json.dumps(response_data, indent=2))
+                calendar_logger.info("=" * 80)
 
+                logger.info(f"Schedule fetch successful: {response.status_code}")
                 return response_data
             except ValueError:
-                logger.info("CALENDAR SERVICE RESPONSE")
-                logger.info(f"Status Code: {response.status_code}")
-                logger.info(f"Response Body (text): {response.text}")
-                logger.info("=" * 60)
+                # Log text response
+                calendar_logger.info("CALENDAR SERVICE RESPONSE (GET SCHEDULE)")
+                calendar_logger.info(f"Status Code: {response.status_code}")
+                calendar_logger.info(f"Response Headers:")
+                for key, value in response.headers.items():
+                    calendar_logger.info(f"  {key}: {value}")
+                calendar_logger.info(f"Response Body (text):")
+                calendar_logger.info(response.text)
+                calendar_logger.info("=" * 80)
 
+                logger.info(f"Schedule fetch successful: {response.status_code}")
                 return {"status": "success", "data": response.text}
 
         except requests.RequestException as e:
-            logger.error("CALENDAR SERVICE ERROR")
-            logger.error(f"Error: {e}")
-            logger.error("=" * 60)
+            # Log error to dedicated calendar log
+            calendar_logger.error("CALENDAR SERVICE ERROR (GET SCHEDULE)")
+            calendar_logger.error(f"Error Type: {type(e).__name__}")
+            calendar_logger.error(f"Error Message: {str(e)}")
+            if hasattr(e, 'response') and e.response is not None:
+                calendar_logger.error(f"Response Status Code: {e.response.status_code}")
+                calendar_logger.error(f"Response Body: {e.response.text}")
+            calendar_logger.error("=" * 80)
+
+            logger.error(f"Calendar service error: {e}")
             raise

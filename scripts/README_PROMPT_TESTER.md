@@ -27,6 +27,22 @@ export OPENAI_API_KEY="sk-..."
 
 ## Usage
 
+### Full Prompt test: 
+```bash
+python scripts/prompt_tester.py ai_prompts/system_prompt.md \
+      --model gpt-4o-mini \
+      --tools \
+      --verbose \
+      -p "user_message=42 has a crew from 1 - 4am" \
+      -p "current_datetime=2026-01-03 21:08:00" \
+      -p "sender_name=Kohler" \
+      -p "sender_squad=42" \
+      -p "current_datetime=2026-01-03 22:33:52" \
+      -p "sender_role=Chief" \
+      -p "resolved_days=2026-01-03" \
+      -p "schedule_state=@data/schedule_saturday.json" --verbose
+```
+
 ### Basic Examples
 
 **1. Test a simple prompt file (default: gpt-4o-mini, temp=0.3)**

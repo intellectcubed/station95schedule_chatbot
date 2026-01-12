@@ -1,0 +1,53 @@
+{
+  "success": true,
+  "action": "get_schedule_day",
+  "date": "20260111",
+  "schedule": {
+  "day": "Sunday 2026-01-11",
+  "shifts": [
+    {
+      "name": "Day Shift",
+      "start_time": "06:00",
+      "end_time": "18:00",
+      "segments": [
+        {
+          "start_time": "06:00",
+          "end_time": "18:00",
+          "squads": [
+            {
+              "id": 54,
+              "territories": [34, 35, 42, 43, 54],
+              "active": true
+            }
+          ]
+        }
+      ],
+      "tango": 54
+    },
+    {
+      "name": "Night Shift",
+      "start_time": "18:00",
+      "end_time": "06:00",
+      "segments": [
+        {
+          "start_time": "18:00",
+          "end_time": "06:00",
+          "squads": [
+            {
+              "id": 42,
+              "territories": [35, 42, 54],
+              "active": true
+            },
+            {
+              "id": 43,
+              "territories": [34, 43],
+              "active": true
+            }
+          ]
+        }
+      ],
+      "tango": 43
+    }
+  ]
+}
+}
