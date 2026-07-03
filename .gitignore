@@ -3,6 +3,8 @@
 .env.local
 .env.*.local
 
+data/roster.json
+
 # Python
 __pycache__/
 *.py[cod]
@@ -85,3 +87,6 @@ dmypy.json
 *.tmp
 *.temp
 .cache/
+
+# Diagnostics scratch work (prompt tuning snapshots)
+diagnostics/optimizations/

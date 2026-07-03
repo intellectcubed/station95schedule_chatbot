@@ -16,7 +16,7 @@ class Settings(BaseSettings):
 
     # Supabase Configuration
     supabase_url: str
-    supabase_key: str  # Service role key (has full access, bypasses RLS)
+    supabase_service_role_key: str  # Service role key (has full access, bypasses RLS)
 
     # OpenAI Configuration (ChatGPT)
     openai_api_key: str
@@ -64,8 +64,8 @@ class Settings(BaseSettings):
         # Check Supabase configuration
         if not self.supabase_url:
             errors.append("SUPABASE_URL is not set")
-        if not self.supabase_key:
-            errors.append("SUPABASE_KEY is not set")
+        if not self.supabase_service_role_key:
+            errors.append("SUPABASE_SERVICE_ROLE_KEY is not set")
 
         # Check OpenAI configuration
         if not self.openai_api_key:

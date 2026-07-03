@@ -1,7 +1,35 @@
 # station95schedule_chatbot
 
 ## Overview
-A chatbot that polls GroupMe messages and responds to scheduling queries.
+AI-powered EMS shift scheduling assistant.
+
+_A chatbot that polls GroupMe messages and responds to scheduling queries._
+
+
+• Uses natural language
+• Understands scheduling requests
+• Supports GroupMe
+• Uses Claude/OpenAI
+• Stores schedule in Supabase
+• Built with Python
+
+## Architecture Diagram
+
+![alt text](docs/images/architecture.png)
+
+## Installation
+```
+git clone
+
+python -m venv
+
+pip install -r requirements.txt
+
+cp .env.example .env
+
+python app.py
+```
+
 
 ### Manual Testing
 

@@ -13,7 +13,7 @@ echo ""
 # Validate required environment variables
 REQUIRED_VARS=(
     "SUPABASE_URL"
-    "SUPABASE_KEY"
+    "SUPABASE_SERVICE_ROLE_KEY"
     "GROUPME_API_TOKEN"
     "GROUPME_GROUP_ID"
     "GROUPME_BOT_ID"

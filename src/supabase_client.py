@@ -30,7 +30,7 @@ class SupabaseClient:
             try:
                 cls._instance = create_client(
                     supabase_url=settings.supabase_url,
-                    supabase_key=settings.supabase_key,
+                    supabase_key=settings.supabase_service_role_key,
                 )
                 logger.info("Supabase client initialized successfully")
             except Exception as e:

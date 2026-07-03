@@ -72,6 +72,78 @@ class ShiftWorkflowState(TypedDict):
 # =============================================================================
 
 
+def convert_schedule_to_csv(schedule_state: dict) -> str:
+    """
+    Convert schedule JSON to CSV format.
+
+    Args:
+        schedule_state: Dictionary containing schedule data from calendar service
+
+    Returns:
+        CSV string with columns: shift_date,shift_type,segment_start,segment_end,squad1,squad2,squad3,squad4,squad5
+    """
+    try:
+        # Parse the nested day_schedule JSON string if present
+        if isinstance(schedule_state, dict) and "day_schedule" in schedule_state:
+            parsed_schedule = json.loads(schedule_state["day_schedule"])
+        else:
+            logger.warning("No day_schedule found in schedule_state")
+            return "shift_date,shift_type,segment_start,segment_end,squad1,squad2,squad3,squad4,squad5\n"
+
+        # Extract date from schedule_state (YYYYMMDD format)
+        date_yyyymmdd = schedule_state.get("date", "")
+
+        # Extract schedule data
+        schedule = parsed_schedule.get("schedule", {})
+        shifts = schedule.get("shifts", [])
+
+        # Build CSV rows
+        csv_rows = ["shift_date,shift_type,segment_start,segment_end,squad1,squad2,squad3,squad4,squad5"]
+
+        for shift in shifts:
+            shift_name = shift.get("name", "")
+
+            # Determine shift_type based on name
+            if "day" in shift_name.lower():
+                shift_type = "day"
+            elif "night" in shift_name.lower():
+                shift_type = "night"
+            else:
+                # Fallback: use start time to determine
+                start_time = shift.get("start_time", "")
+                shift_type = "night" if start_time.startswith("18") else "day"
+
+            segments = shift.get("segments", [])
+
+            for segment in segments:
+                # Convert HH:MM to HHMM
+                segment_start = segment.get("start_time", "").replace(":", "")
+                segment_end = segment.get("end_time", "").replace(":", "")
+
+                # Extract active squad IDs
+                squads = segment.get("squads", [])
+                active_squad_ids = [
+                    str(squad["id"])
+                    for squad in squads
+                    if squad.get("active", False)
+                ]
+
+                # Pad to 5 squads (or truncate if more than 5)
+                while len(active_squad_ids) < 5:
+                    active_squad_ids.append("")
+                active_squad_ids = active_squad_ids[:5]
+
+                # Create CSV row
+                row = f"{date_yyyymmdd},{shift_type},{segment_start},{segment_end},{','.join(active_squad_ids)}"
+                csv_rows.append(row)
+
+        return "\n".join(csv_rows)
+
+    except (json.JSONDecodeError, KeyError, TypeError) as e:
+        logger.error(f"Failed to convert schedule to CSV: {e}")
+        return "shift_date,shift_type,segment_start,segment_end,squad1,squad2,squad3,squad4,squad5\n"
+
+
 def load_system_prompt() -> str:
     """Load the system prompt from file."""
     prompt_path = Path(settings.system_prompt_path)
@@ -90,7 +162,6 @@ def create_llm() -> ChatOpenAI:
         temperature=0.3,
         api_key=settings.openai_api_key
     )
-    print(f'Here is the thingy: {settings.openai_api_key}')
     # Debug logging to verify actual model and API key presence
     logger.info(f"Created LLM with model_name attr: {getattr(llm, 'model_name', 'N/A')}")
     logger.info(f"Created LLM with model attr: {getattr(llm, 'model', 'N/A')}")
@@ -126,26 +197,12 @@ def extract_parameters_node(state: ShiftWorkflowState) -> ShiftWorkflowState:
         resolved_days = state.get("resolved_days", [])
         resolved_days_str = ", ".join(resolved_days) if resolved_days else "Not specified"
 
-        # Format schedule state
+        # Format schedule state as CSV
         schedule_state = state.get("schedule_state")
         if schedule_state:
-            # Parse the day_schedule JSON string if present
-            if isinstance(schedule_state, dict) and "day_schedule" in schedule_state:
-                try:
-                    # Parse the nested JSON string
-                    parsed_schedule = json.loads(schedule_state["day_schedule"])
-                    # Create a clean format for the LLM
-                    schedule_state_str = json.dumps({
-                        "success": schedule_state.get("success"),
-                        "action": schedule_state.get("action"),
-                        "date": schedule_state.get("date"),
-                        "schedule": parsed_schedule  # Now properly parsed
-                    }, indent=2)
-                except (json.JSONDecodeError, KeyError) as e:
-                    logger.warning(f"Failed to parse day_schedule JSON: {e}")
-                    schedule_state_str = json.dumps(schedule_state, indent=2)
-            else:
-                schedule_state_str = json.dumps(schedule_state, indent=2)
+            # Convert schedule JSON to CSV format
+            schedule_state_str = convert_schedule_to_csv(schedule_state)
+            logger.info(f"Converted schedule to CSV format ({len(schedule_state_str)} chars)")
         else:
             schedule_state_str = "Schedule state not available"
 

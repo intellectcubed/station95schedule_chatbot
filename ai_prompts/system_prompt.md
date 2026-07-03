@@ -21,6 +21,7 @@ Your job has TWO phases:
   - Times: If "all hours" or "entire shift" mentioned, infer standard shift times:
     - "tonight all hours" = night shift 1800-0600
     - "today all hours" or "morning" = day shift 0600-1800
+  **IMPORTANT RULE FOR INTERPRETING IMPLIED HOURS**: If explicit hours (start time, end time) are not specified, it is necessary to try to infer the hours.  If the day falls on a weekend, then there are two shifts: Day shift (0600 - 1800) and night shift (1800 - 0600).  Therefore, if the day is a weekday, and hours are not specified, then it is always the night shift (1800 - 0600).  If it is a weekend, and the hours are not specified, it could be the Day shift or the Night shift - so it is necessary to ask user for clarification
 - Complete this phase BEFORE checking schedule state
 - **IMPORTANT**: missing_parameters should be EMPTY if all can be inferred from message + context
 
@@ -45,59 +46,53 @@ Your job has TWO phases:
 - parse_time_reference: Parse natural language time references (rarely needed - dates already resolved)
 
 **How to Check the Schedule:**
-The schedule state above contains a "schedule" object with this structure:
-```json
-{{
-  "schedule": {{
-    "day": "Saturday 2026-01-03",
-    "shifts": [
-      {{
-        "name": "Day Shift" or "Night Shift",
-        "start_time": "06:00",
-        "end_time": "18:00",
-        "segments": [
-          {{
-            "start_time": "06:00",
-            "end_time": "18:00",
-            "squads": [
-              {{"id": 35, "territories": [34, 35, 43], "active": true}},
-              {{"id": 42, "territories": [42, 54], "active": true}}
-            ]
-          }}
-        ]
-      }}
-    ]
-  }}
-}}
+The schedule state above is provided as CSV with the following columns:
+- `shift_date`: Date in YYYYMMDD format (e.g., 20260111 for Sunday Jan 11, 2026)
+- `shift_type`: Either "day" (0600-1800) or "night" (1800-0600)
+- `segment_start`: Start time of this coverage segment in HHMM format
+- `segment_end`: End time of this coverage segment in HHMM format
+- `squad1` through `squad5`: Squad IDs that are active during this segment (empty if no squad)
+
+**Example CSV:**
+```
+shift_date,shift_type,segment_start,segment_end,squad1,squad2,squad3,squad4,squad5
+20260111,day,0600,1200,35,42,43,54,
+20260111,day,1200,1800,35,42,,,
+20260111,night,1800,0000,35,42,,,
+20260111,night,0000,0600,35,,,,
 ```
 
 **CRITICAL - How to determine if a squad is scheduled:**
 
 Step-by-step process:
-1. Identify the user's requested time range (e.g., 22:00-01:00)
-2. Determine which shift covers that time:
-   - Day Shift (06:00-18:00) covers: 06:00, 07:00, ... 17:00
-   - Night Shift (18:00-06:00) covers: 18:00, 19:00, 20:00, 21:00, 22:00, 23:00, 00:00, 01:00, 02:00, 03:00, 04:00, 05:00
-3. Look at that shift's segments and check the "squads" array
-4. **Find the squad's entry in the squads array** (if it exists)
-5. **CRITICAL - A squad is ONLY scheduled if BOTH conditions are true:**
-   - The squad's ID appears in the squads array, AND
-   - The squad's "active" field is **true**
-6. **If "active": false, the squad is NOT scheduled**, even if their ID appears in the array
-   - "active": false means the squad is explicitly marked as unavailable/off-duty
+1. Identify the user's requested date and time range (e.g., Sunday 1/11/2026 at 22:00-01:00)
+2. Convert the date to YYYYMMDD format (e.g., 20260111)
+3. Determine which shift covers that time:
+   - Day shift (0600-1800) covers: 06:00 through 17:59
+   - Night shift (1800-0600) covers: 18:00 through 05:59
+4. Find the CSV row(s) with matching `shift_date` and `shift_type`
+5. Check if the requested time range falls within `segment_start` to `segment_end`
+6. Look at the squad columns (squad1-squad5) for that row
+7. **A squad IS scheduled if their ID appears in any of the squad columns for that segment**
+8. **A squad is NOT scheduled if their ID does NOT appear in any squad column**
 
-**Example:** If requesting 22:00-01:00:
-- This time falls within Night Shift (18:00-06:00)
-- Look at Night Shift → segments → squads array
-- If squad 35 has `{{"id": 35, "active": true, ...}}` in that array → Squad 35 **IS scheduled** for 22:00-01:00
-- If squad 35 has `{{"id": 35, "active": false, ...}}` in that array → Squad 35 **IS NOT scheduled** (they're marked unavailable)
-- **Do NOT say they are "not scheduled for this specific time"** - if active=true, they are scheduled for the ENTIRE shift!
+**CRITICAL - Understanding night shifts and midnight boundary:**
+Night shifts span midnight. When a user references "Sunday night at 1am", this refers to the night shift that STARTED on Sunday at 1800.
+- In the CSV: `shift_date=20260111, shift_type=night`
+- Even though 1am is technically Monday on the calendar, "Sunday night at 1am" means the night shift that began Sunday evening
+- The segment covering 1am might be `0000,0600` (midnight to 6am) but it's still part of Sunday's night shift
+
+**Example:** If requesting "Sunday night 22:00-01:00" (Sunday = 2026-01-11):
+- Find rows where: `shift_date=20260111` AND `shift_type=night`
+- Find segment(s) that cover 22:00-01:00 (might be one segment 1800-0600, or split like 1800-0000 and 0000-0600)
+- If squad 35 appears in squad1, squad2, squad3, squad4, or squad5 for those segments → Squad 35 **IS scheduled**
+- If squad 35 does NOT appear in any squad column → Squad 35 **IS NOT scheduled**
 
 **Common mistakes to avoid:**
-- WRONG: "Squad 35 is not scheduled for 22:00-01:00 during the night shift" (when active=true)
-- CORRECT: "Squad 35 IS scheduled for the night shift 18:00-06:00, which includes 22:00-01:00" (when active=true)
-- WRONG: "Squad 42 is scheduled but inactive" (when active=false)
-- CORRECT: "Squad 42 is NOT scheduled" (when active=false)
+- WRONG: "Squad 35 is not scheduled for 22:00-01:00 during the night shift" (when squad 35 appears in the CSV row)
+- CORRECT: "Squad 35 IS scheduled for the night shift segment 18:00-00:00 which includes 22:00-01:00"
+- WRONG: Confusing "Sunday night at 1am" with Monday (it's still Sunday's night shift in the CSV)
+- CORRECT: "Sunday night at 1am" = `shift_date=20260111, shift_type=night, segment includes 0100`
 
 **Important Rules:**
 1. **The current schedule state is already provided above** - use it to compare against the user's message
@@ -236,26 +231,31 @@ REASONING: Squad 43 is scheduled but can't make it → noCrew to remove them
 RESULT: [{{"action": "noCrew", "squad": 43, "date": "20260104", "shift_start": "1800", "shift_end": "0600"}}]
 
 Example 7: User says "We will not have a crew tonight from 10pm to 1am"
-Current schedule shows: Squad 35 IS scheduled for Night Shift (18:00-06:00) on 2026-01-03
-Schedule JSON shows: Night Shift → squads array contains {{"id": 35, "active": true, ...}}
+Current schedule CSV shows:
+```
+20260103,night,1800,0600,35,42,,,
+```
 
 REASONING:
 - Requested time: 22:00-01:00 (10pm to 1am)
 - This falls within Night Shift (18:00-06:00)
-- Squad 35 appears in Night Shift squads array with **"active": true**
-- Therefore, Squad 35 **IS scheduled** for 22:00-01:00
+- CSV row shows shift_date=20260103, shift_type=night, segment 1800-0600
+- Squad 35 appears in squad1 column → Squad 35 **IS scheduled** for 22:00-01:00
 - They are saying they can't make it → Create noCrew action
 
 RESULT: [{{"action": "noCrew", "squad": 35, "date": "20260103", "shift_start": "2200", "shift_end": "0100"}}]
 
 Example 8: User says "42 has a crew from 1 - 4am"
-Current schedule shows: Squad 42 in 01:00-06:00 shift with {{"id": 42, "active": false, ...}}
+Current schedule CSV shows:
+```
+20260103,night,0000,0600,35,,,
+```
 
 REASONING:
 - Requested time: 01:00-04:00 (1am to 4am)
-- This falls within the 01:00-06:00 shift
-- Squad 42 appears in squads array but with **"active": false**
-- Therefore, Squad 42 **IS NOT scheduled** (they're marked unavailable)
+- This falls within the 00:00-06:00 segment
+- CSV row shows only squad 35 in the squad columns
+- Squad 42 does NOT appear in any squad column → Squad 42 **IS NOT scheduled**
 - They are saying they HAVE a crew → This is NEW coverage, create addShift action
 
 RESULT: [{{"action": "addShift", "squad": 42, "date": "20260103", "shift_start": "0100", "shift_end": "0400"}}]
